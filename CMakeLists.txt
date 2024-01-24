@@ -13,15 +13,22 @@ set(SRC
         src/log.cpp
         src/util.cpp
         src/config.cpp
+        src/thread.cpp
+)
+
+set(TEST
+        tests/log_test.cpp
+        tests/config_test.cpp
+        tests/thread_test.cpp
+
 )
 
 #add_executable(dunar src/main.cpp)
 
 add_executable(test
-        ${SRC}
         tests/test.cpp
-        tests/log_test.cpp
-        tests/config_test.cpp
+        ${SRC}
+        ${TEST}
 )
 
 target_link_libraries(test
@@ -29,7 +36,3 @@ target_link_libraries(test
         GTest::GTest
         GTest::Main
 )
-
-#add_executable(test_config tests/test_config.cc)
-#add_dependencies(test_config sylar)
-#target_link_libraries(test_config sylar ${YAMLCPP})
