@@ -243,6 +243,8 @@ TEST(ConfigTest, LOGTEST) {
   std::cout << "=============" << std::endl;
   std::cout << root << std::endl;
   DUNAR_LOG_INFO(system_log) << "hello system" << std::endl;
+  system_log->setFormatter("%d - %m%n");
+  DUNAR_LOG_INFO(system_log) << "hello system" << std::endl;
 }
 
 TEST(ConfigTest, LOADTEST) {
