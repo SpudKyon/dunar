@@ -10,14 +10,20 @@
 
 dunar::Logger::ptr g_logger = DUNAR_LOG_ROOT();
 
+int count = 0;
+dunar::RWMutex s_mutex;
+
 void fun1() {
   DUNAR_LOG_INFO(g_logger) << "name: " << dunar::Thread::GetName()
                            << " this.name: "
                            << dunar::Thread::GetThis()->getName()
                            << " id: " << dunar::GetThreadId()
                            << " this.id: " << dunar::Thread::GetThis()->getId();
-  sleep(20);
-}
+
+  for(int i = 0; i < 100000; ++i) {
+    dunar::RWMutex::WriteLock lock(s_mutex);
+    ++count;
+  }}
 
 void fun2() {}
 
@@ -34,4 +40,5 @@ TEST(ThreadTest, TEST1) {
     thrs[i]->join();
   }
   DUNAR_LOG_INFO(g_logger) << "thread test end";
+  DUNAR_LOG_INFO(g_logger) << "count=" << count;
 }

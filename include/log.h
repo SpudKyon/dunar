@@ -252,7 +252,7 @@ class LoggerManager {
   Logger::ptr m_root;
 };
 
-typedef dunar::Singleton<LoggerManager> LoggerMgr;
+using LoggerMgr = dunar::Singleton<LoggerManager>;
 
 }  // namespace dunar
 
