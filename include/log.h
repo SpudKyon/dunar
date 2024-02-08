@@ -6,14 +6,15 @@
 #define DUNAR_LOG_H
 
 #include "singleton.h"
+#include "thread.h"
 #include "util.h"
+#include <cstdarg>
+#include <cstdint>
 #include <fstream>
 #include <list>
 #include <map>
 #include <memory>
 #include <sstream>
-#include <stdarg.h>
-#include <stdint.h>
 #include <string>
 #include <vector>
 
@@ -22,7 +23,7 @@
   dunar::LogEventWrap(                                                \
       dunar::LogEvent::ptr(new dunar::LogEvent(                       \
           logger, level, __FILE__, __LINE__, 0, dunar::GetThreadId(), \
-          dunar::GetFiberId(), time(0))))                             \
+          dunar::GetFiberId(), time(0), dunar::Thread::GetName())))   \
       .getSS()
 
 #define DUNAR_LOG_DEBUG(logger) DUNAR_LOG_LEVEL(logger, dunar::LogLevel::DEBUG)
@@ -36,7 +37,7 @@
   dunar::LogEventWrap(                                                \
       dunar::LogEvent::ptr(new dunar::LogEvent(                       \
           logger, level, __FILE__, __LINE__, 0, dunar::GetThreadId(), \
-          dunar::GetFiberId(), time(0))))                             \
+          dunar::GetFiberId(), time(0), dunar::Thread::GetName())))   \
       .getEvent()                                                     \
       ->format(fmt, __VA_ARGS__)
 
@@ -81,7 +82,8 @@ class LogEvent {
   using ptr = std::shared_ptr<LogEvent>;
   LogEvent(std::shared_ptr<Logger> logger, LogLevel::Level level,
            const char* file, int32_t m_line, uint32_t elapse,
-           uint32_t thread_id, uint32_t fiber_id, uint64_t time);
+           uint32_t thread_id, uint32_t fiber_id, uint64_t time,
+           const std::string& thread_name);
 
   const char* getFile() const { return m_file; }
   int32_t getLine() const { return m_line; }
@@ -92,6 +94,7 @@ class LogEvent {
   std::string getContent() const { return m_ss.str(); }
   std::shared_ptr<Logger> getLogger() const { return m_logger; }
   LogLevel::Level getLevel() const { return m_level; }
+  const std::string& getThreadName() const { return m_threadName; }
 
   std::stringstream& getSS() { return m_ss; }
   void format(const char* fmt, ...);
@@ -104,6 +107,7 @@ class LogEvent {
   uint32_t m_threadId = 0;       // 线程id
   uint32_t m_fiberId = 0;        // 协程id
   uint64_t m_time = 0;           // 时间戳
+  std::string m_threadName;
   std::stringstream m_ss;
 
   std::shared_ptr<Logger> m_logger;
@@ -156,6 +160,7 @@ class LogAppender {
 
  public:
   using ptr = std::shared_ptr<LogAppender>;
+  using MutexType = Spinlock;
   virtual ~LogAppender() {}
 
   virtual std::string toYamlString() = 0;
@@ -163,7 +168,7 @@ class LogAppender {
                    LogEvent::ptr event) = 0;
 
   void setFormatter(LogFormatter::ptr val);
-  LogFormatter::ptr getFormatter() const { return m_formatter; }
+  LogFormatter::ptr getFormatter();
 
   LogLevel::Level getLevel() const { return m_level; }
   void setLevel(LogLevel::Level val) { m_level = val; }
@@ -172,6 +177,7 @@ class LogAppender {
   LogLevel::Level m_level = LogLevel::DEBUG;
   bool m_hasFormatter = false;
   LogFormatter::ptr m_formatter;
+  MutexType m_mutex;
 };
 
 // 日志器
@@ -180,6 +186,7 @@ class Logger : public std::enable_shared_from_this<Logger> {
 
  public:
   using ptr = std::shared_ptr<Logger>;
+  using MutexType = Spinlock;
 
   Logger(const std::string& name = "root");
   void log(LogLevel::Level level, LogEvent::ptr event);
@@ -209,6 +216,7 @@ class Logger : public std::enable_shared_from_this<Logger> {
   std::list<LogAppender::ptr> m_appenders;  // Appender集合
   LogFormatter::ptr m_formatter;
   Logger::ptr m_root;
+  MutexType m_mutex;
 };
 
 // 输出到控制台的Appender
@@ -235,10 +243,13 @@ class FileLogAppender : public LogAppender {
  private:
   std::string m_filename;
   std::ofstream m_filestream;
+  uint64_t m_lastTime = 0;
 };
 
 class LoggerManager {
  public:
+  using MutexType = Spinlock;
+
   LoggerManager();
   Logger::ptr getLogger(const std::string& name);
 
@@ -250,6 +261,7 @@ class LoggerManager {
  private:
   std::map<std::string, Logger::ptr> m_loggers;
   Logger::ptr m_root;
+  MutexType m_mutex;
 };
 
 using LoggerMgr = dunar::Singleton<LoggerManager>;

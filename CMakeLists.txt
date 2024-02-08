@@ -14,12 +14,15 @@ set(SRC
         src/util.cpp
         src/config.cpp
         src/thread.cpp
+        src/fiber.cpp
+        src/scheduler.cpp
 )
 
 set(TEST
         tests/log_test.cpp
         tests/config_test.cpp
         tests/thread_test.cpp
+        tests/fiber_test.cpp
 
 )
 

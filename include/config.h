@@ -18,6 +18,7 @@ namespace dunar {
 class ConfigVarBase {
  public:
   using ptr = std::shared_ptr<ConfigVarBase>;
+  using RWMutexType = RWMutex;
   ConfigVarBase(const std::string& name, const std::string& description = "")
       : m_name(name), m_description(description) {
     std::transform(m_name.begin(), m_name.end(), m_name.begin(), ::tolower);
@@ -32,8 +33,6 @@ class ConfigVarBase {
   virtual std::string getTypeName() const = 0;
 
  protected:
-
-
   std::string m_name;
   std::string m_description;
 };
@@ -52,9 +51,9 @@ class LexicalCast<std::string, std::vector<T>> {
     YAML::Node node = YAML::Load(v);
     typename std::vector<T> vec;
     std::stringstream ss;
-    for (size_t i = 0; i < node.size(); ++i) {
+    for (auto && i : node) {
       ss.str("");
-      ss << node[i];
+      ss << i;
       vec.push_back(LexicalCast<std::string, T>()(ss.str()));
     }
     return vec;
@@ -82,9 +81,9 @@ class LexicalCast<std::string, std::list<T>> {
     YAML::Node node = YAML::Load(v);
     typename std::list<T> vec;
     std::stringstream ss;
-    for (size_t i = 0; i < node.size(); ++i) {
+    for (auto && i : node) {
       ss.str("");
-      ss << node[i];
+      ss << i;
       vec.push_back(LexicalCast<std::string, T>()(ss.str()));
     }
     return vec;
@@ -112,9 +111,9 @@ class LexicalCast<std::string, std::set<T>> {
     YAML::Node node = YAML::Load(v);
     typename std::set<T> vec;
     std::stringstream ss;
-    for (size_t i = 0; i < node.size(); ++i) {
+    for (auto && i : node) {
       ss.str("");
-      ss << node[i];
+      ss << i;
       vec.insert(LexicalCast<std::string, T>()(ss.str()));
     }
     return vec;
@@ -142,9 +141,9 @@ class LexicalCast<std::string, std::unordered_set<T>> {
     YAML::Node node = YAML::Load(v);
     typename std::unordered_set<T> vec;
     std::stringstream ss;
-    for (size_t i = 0; i < node.size(); ++i) {
+    for (auto && i : node) {
       ss.str("");
-      ss << node[i];
+      ss << i;
       vec.insert(LexicalCast<std::string, T>()(ss.str()));
     }
     return vec;
@@ -243,6 +242,7 @@ class ConfigVar : public ConfigVarBase {
   std::string toString() override {
     try {
       // return boost::lexical_cast<std::string>(m_val);
+      RWMutexType ::ReadLock lock(m_mutex);
       return ToStr()(m_val);
     } catch (std::exception& e) {
       DUNAR_LOG_ERROR(DUNAR_LOG_ROOT())
@@ -264,31 +264,53 @@ class ConfigVar : public ConfigVarBase {
     return false;
   }
 
-  const T getValue() const { return m_val; }
+  const T getValue() {
+    RWMutexType::ReadLock lock(m_mutex);
+    return m_val;
+  }
+
   void setValue(const T& v) {
-    if (v == m_val) {
-      return;
+    {
+      RWMutexType ::ReadLock lock(m_mutex);
+      if (v == m_val) {
+        return;
+      }
+      for (auto& i : m_cbs) {
+        i.second(m_val, v);
+      }
     }
-    for (auto& i : m_cbs) {
-      i.second(m_val, v);
-    }
+    RWMutexType ::WriteLock lock(m_mutex);
     m_val = v;
   }
 
   std::string getTypeName() const override { return typeid(T).name(); }
 
-  void addListener(uint64_t key, on_change_cb cb) { m_cbs[key] = cb; }
+  uint64_t addListener(on_change_cb cb) {
+    static uint64_t s_fun_id = 0;
+    RWMutexType::WriteLock lock(m_mutex);
+    ++s_fun_id;
+    m_cbs[s_fun_id] = cb;
+    return s_fun_id;
+  }
 
-  void delListener(uint64_t key) { m_cbs.erase(key); }
+  void delListener(uint64_t key) {
+    RWMutexType::WriteLock lock(m_mutex);
+    m_cbs.erase(key);
+  }
 
   on_change_cb getListener(uint64_t key) {
+    RWMutexType::WriteLock lock(m_mutex);
     auto it = m_cbs.find(key);
     return it == m_cbs.end() ? nullptr : it->second;
   }
 
-  void clearListener() { m_cbs.clear(); }
+  void clearListener() {
+    RWMutexType::WriteLock lock(m_mutex);
+    m_cbs.clear();
+  }
 
  private:
+  RWMutexType m_mutex;
   T m_val;
   // 变更回调函数组, uint64_t key,要求唯一，一般可以用hash
   std::map<uint64_t, on_change_cb> m_cbs;
@@ -297,11 +319,13 @@ class ConfigVar : public ConfigVarBase {
 class Config {
  public:
   using ConfigVarMap = std::unordered_map<std::string, ConfigVarBase::ptr>;
+  using RWMutexType = RWMutex;
 
   template <class T>
   static typename ConfigVar<T>::ptr Lookup(
       const std::string& name, const T& default_value,
       const std::string& description = "") {
+    RWMutexType::WriteLock lock(GetMutex());
     auto it = GetDatas().find(name);
     if (it != GetDatas().end()) {
       auto tmp = std::dynamic_pointer_cast<ConfigVar<T>>(it->second);
@@ -331,6 +355,7 @@ class Config {
 
   template <class T>
   static typename ConfigVar<T>::ptr Lookup(const std::string& name) {
+    RWMutexType::ReadLock lock(GetMutex());
     auto it = GetDatas().find(name);
     if (it == GetDatas().end()) {
       return nullptr;
@@ -340,11 +365,17 @@ class Config {
 
   static void LoadFromYaml(const YAML::Node& root);
   static ConfigVarBase::ptr LookupBase(const std::string& name);
+  static void Visit(std::function<void(ConfigVarBase::ptr)> cb);
 
  private:
   static ConfigVarMap& GetDatas() {
     static ConfigVarMap s_datas;
     return s_datas;
+  }
+
+  static RWMutexType& GetMutex() {
+    static RWMutexType s_mutex;
+    return s_mutex;
   }
 };
 
