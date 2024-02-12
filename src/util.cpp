@@ -6,6 +6,7 @@
 #include "fiber.h"
 #include "log.h"
 #include <execinfo.h>
+#include <sys/time.h>
 
 namespace dunar {
 
@@ -41,6 +42,18 @@ std::string BacktraceToString(int size, int skip, const std::string& prefix) {
     ss << prefix << i << std::endl;
   }
   return ss.str();
+}
+
+uint64_t GetCurrentMS() {
+  struct timeval tv{};
+  gettimeofday(&tv, nullptr);
+  return tv.tv_sec * 1000ul + tv.tv_usec / 1000;
+}
+
+uint64_t GetCurrentUS() {
+  struct timeval tv{};
+  gettimeofday(&tv, nullptr);
+  return tv.tv_sec * 1000 * 1000ul + tv.tv_usec;
 }
 
 }  // namespace dunar

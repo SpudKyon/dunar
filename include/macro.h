@@ -16,7 +16,9 @@
         << dunar::BacktraceToString(100, 2, "    "); \
     assert(x);                                       \
   }
-
+/**
+ *
+ */
 #define DUNAR_ASSERT2(x, w)                          \
   if (!(x)) {                                        \
     DUNAR_LOG_ERROR(DUNAR_LOG_ROOT())                \

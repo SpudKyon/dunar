@@ -145,8 +145,8 @@ class NullMutex {
 
 class RWMutex {
  public:
-  typedef ReadScopedLockImpl<RWMutex> ReadLock;
-  typedef WriteScopedLockImpl<RWMutex> WriteLock;
+  using ReadLock = ReadScopedLockImpl<RWMutex>;
+  using WriteLock = WriteScopedLockImpl<RWMutex>;
 
   RWMutex() { pthread_rwlock_init(&m_lock, nullptr); }
 
