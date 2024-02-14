@@ -14,6 +14,8 @@ namespace dunar {
 class TimerManager;
 class Timer : public std::enable_shared_from_this<Timer> {
   friend class TimerManager;
+
+ public:
   using ptr = std::shared_ptr<Timer>;
   bool cancel();
   bool refresh();
@@ -39,6 +41,7 @@ class Timer : public std::enable_shared_from_this<Timer> {
 
 class TimerManager {
   friend class Timer;
+
  public:
   using RWMutexType = RWMutex;
 

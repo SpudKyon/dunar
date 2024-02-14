@@ -3,6 +3,7 @@
 //
 
 #include "scheduler.h"
+#include "hook.h"
 #include "log.h"
 #include "macro.h"
 
@@ -131,6 +132,7 @@ void Scheduler::setThis() { t_scheduler = this; }
 
 void Scheduler::run() {
   DUNAR_LOG_INFO(g_logger) << "run";
+  set_hook_enable(true);
   setThis();
   if (GetThreadId() != m_rootThread) {
     t_fiber = Fiber::GetThis().get();

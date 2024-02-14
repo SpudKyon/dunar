@@ -5,6 +5,7 @@
 #ifndef DUNAR_THREAD_H
 #define DUNAR_THREAD_H
 
+#include "noncopyable.h"
 #include <atomic>
 #include <cstdint>
 #include <functional>
@@ -14,18 +15,13 @@
 
 namespace dunar {
 
-class Semaphore {
+class Semaphore : Noncopyable {
  public:
   Semaphore(uint32_t count = 0);
   ~Semaphore();
 
   void wait();
   void notify();
-
- private:
-  Semaphore(const Semaphore&) = delete;
-  Semaphore(const Semaphore&&) = delete;
-  Semaphore& operator=(const Semaphore&) = delete;
 
  private:
   sem_t m_semaphore;
@@ -118,7 +114,7 @@ struct WriteScopedLockImpl {
   bool m_locked;
 };
 
-class Mutex {
+class Mutex : Noncopyable {
  public:
   using Lock = ScopedLockImpl<Mutex>;
 
@@ -134,7 +130,7 @@ class Mutex {
   pthread_mutex_t m_mutex;
 };
 
-class NullMutex {
+class NullMutex : Noncopyable {
  public:
   typedef ScopedLockImpl<NullMutex> Lock;
   NullMutex() {}
@@ -143,7 +139,7 @@ class NullMutex {
   void unlock() {}
 };
 
-class RWMutex {
+class RWMutex : Noncopyable {
  public:
   using ReadLock = ReadScopedLockImpl<RWMutex>;
   using WriteLock = WriteScopedLockImpl<RWMutex>;
@@ -162,7 +158,7 @@ class RWMutex {
   pthread_rwlock_t m_lock;
 };
 
-class NullRWMutex {
+class NullRWMutex : Noncopyable {
  public:
   using ReadLock = ReadScopedLockImpl<NullMutex>;
   using WriteLock = WriteScopedLockImpl<NullMutex>;
@@ -178,7 +174,7 @@ class NullRWMutex {
   void unlock();
 };
 
-class Spinlock {
+class Spinlock : Noncopyable {
  public:
   using Lock = ScopedLockImpl<Spinlock>;
   Spinlock() { pthread_spin_init(&m_mutex, 0); }
@@ -193,7 +189,7 @@ class Spinlock {
   pthread_spinlock_t m_mutex;
 };
 
-class CASLock {
+class CASLock : Noncopyable {
  public:
   using Lock = ScopedLockImpl<CASLock>;
   CASLock() { m_mutex.clear(); }
@@ -213,7 +209,7 @@ class CASLock {
   volatile std::atomic_flag m_mutex;
 };
 
-class Thread {
+class Thread : Noncopyable {
  public:
   using ptr = std::shared_ptr<Thread>;
   Thread(std::function<void()> cb, const std::string& name);

@@ -22,13 +22,8 @@ class Scheduler {
             const std::string& name = "");
   virtual ~Scheduler();
 
-  const std::string& getName() const {
-    GetMainFiber();
-    return m_name;
-  }
-
+  const std::string& getName() const { return m_name; }
   static Scheduler* GetThis();
-
   static Fiber* GetMainFiber();
 
   void start();
@@ -67,7 +62,6 @@ class Scheduler {
   void run();
   virtual bool stopping();
   virtual void idle();
-
   void setThis();
   bool hasIdleThreads() { return m_idleThreadCount > 0; }
 
@@ -89,17 +83,12 @@ class Scheduler {
     int thread;
 
     FiberAndThread(Fiber::ptr f, int thr) : fiber(f), thread(thr) {}
-
     FiberAndThread(Fiber::ptr* f, int thr) : thread(thr) { fiber.swap(*f); }
-
     FiberAndThread(std::function<void()> f, int thr) : cb(f), thread(thr) {}
-
     FiberAndThread(std::function<void()>* f, int thr) : thread(thr) {
       cb.swap(*f);
     }
-
     FiberAndThread() : thread(-1) {}
-
     void reset() {
       fiber = nullptr;
       cb = nullptr;

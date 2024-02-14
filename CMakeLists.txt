@@ -18,6 +18,9 @@ set(SRC
         src/scheduler.cpp
         src/iomanager.cpp
         src/timer.cpp
+        src/address.cpp
+        src/fd_manager.cpp
+        src/hook.cpp
 )
 
 set(TEST

@@ -51,7 +51,7 @@ class LexicalCast<std::string, std::vector<T>> {
     YAML::Node node = YAML::Load(v);
     typename std::vector<T> vec;
     std::stringstream ss;
-    for (auto && i : node) {
+    for (auto&& i : node) {
       ss.str("");
       ss << i;
       vec.push_back(LexicalCast<std::string, T>()(ss.str()));
@@ -81,7 +81,7 @@ class LexicalCast<std::string, std::list<T>> {
     YAML::Node node = YAML::Load(v);
     typename std::list<T> vec;
     std::stringstream ss;
-    for (auto && i : node) {
+    for (auto&& i : node) {
       ss.str("");
       ss << i;
       vec.push_back(LexicalCast<std::string, T>()(ss.str()));
@@ -111,7 +111,7 @@ class LexicalCast<std::string, std::set<T>> {
     YAML::Node node = YAML::Load(v);
     typename std::set<T> vec;
     std::stringstream ss;
-    for (auto && i : node) {
+    for (auto&& i : node) {
       ss.str("");
       ss << i;
       vec.insert(LexicalCast<std::string, T>()(ss.str()));
@@ -141,7 +141,7 @@ class LexicalCast<std::string, std::unordered_set<T>> {
     YAML::Node node = YAML::Load(v);
     typename std::unordered_set<T> vec;
     std::stringstream ss;
-    for (auto && i : node) {
+    for (auto&& i : node) {
       ss.str("");
       ss << i;
       vec.insert(LexicalCast<std::string, T>()(ss.str()));
