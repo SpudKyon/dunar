@@ -3,7 +3,7 @@
 //
 
 #include "address.h"
-#include "endian.h"
+#include "my_endian.h"
 #include "log.h"
 #include <arpa/inet.h>
 #include <cstring>
@@ -446,7 +446,7 @@ UnixAddress::UnixAddress() {
 
 UnixAddress::UnixAddress(const std::string& path) {
   memset(&m_addr, 0, sizeof(m_addr));
-  m_addr.sin_family = AF_UNIX;
+  m_addr.sun_family = AF_UNIX;
   m_length = path.size() + 1;
 
   if (!path.empty() && path[0] == '\0') {

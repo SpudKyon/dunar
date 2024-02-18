@@ -2,8 +2,11 @@
 // Created by spud on 24-1-19.
 //
 
+#include "log.h"
 #include <gtest/gtest.h>
 #include <iostream>
+
+dunar::Logger::ptr test_logger = DUNAR_LOG_ROOT();
 
 int main(int argc, char **argv) {
   if (false)  // make false to run unit-tests

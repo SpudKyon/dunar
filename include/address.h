@@ -5,11 +5,17 @@
 #ifndef DUNAR_ADDRESS_H
 #define DUNAR_ADDRESS_H
 
+#include <arpa/inet.h>
+#include <iostream>
 #include <map>
 #include <memory>
-#include <netinet/in.h>
+#include <string>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/un.h>
+#include <unistd.h>
 #include <vector>
+
 namespace dunar {
 
 class IPAddress;
@@ -121,7 +127,7 @@ class UnixAddress : public Address {
   std::ostream& insert(std::ostream& os) const override;
 
  private:
-  sockaddr_in m_addr;
+  sockaddr_un m_addr;
   socklen_t m_length;
 };
 

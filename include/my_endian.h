@@ -9,6 +9,7 @@
 #define DUNAR_BIG_ENDIAN 2
 
 #include <byteswap.h>
+#include <stdint.h>
 
 namespace dunar {
 

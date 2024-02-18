@@ -8,13 +8,13 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-dunar::Logger::ptr thread_logger = DUNAR_LOG_ROOT();
+extern dunar::Logger::ptr test_logger;
 
 int count = 0;
 dunar::RWMutex s_mutex;
 
 void fun1() {
-  DUNAR_LOG_INFO(thread_logger) << "name: " << dunar::Thread::GetName()
+  DUNAR_LOG_INFO(test_logger) << "name: " << dunar::Thread::GetName()
                            << " this.name: "
                            << dunar::Thread::GetThis()->getName()
                            << " id: " << dunar::GetThreadId()
@@ -29,7 +29,7 @@ void fun1() {
 void fun2() {}
 
 TEST(ThreadTest, TEST1) {
-  DUNAR_LOG_INFO(thread_logger) << "thread test begin";
+  DUNAR_LOG_INFO(test_logger) << "thread test begin";
   std::vector<dunar::Thread::ptr> thrs;
   for (int i = 0; i < 5; ++i) {
     dunar::Thread::ptr thr(
@@ -40,6 +40,6 @@ TEST(ThreadTest, TEST1) {
   for (int i = 0; i < 5; ++i) {
     thrs[i]->join();
   }
-  DUNAR_LOG_INFO(thread_logger) << "thread test end";
-  DUNAR_LOG_INFO(thread_logger) << "count=" << count;
+  DUNAR_LOG_INFO(test_logger) << "thread test end";
+  DUNAR_LOG_INFO(test_logger) << "count=" << count;
 }

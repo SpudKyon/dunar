@@ -10,7 +10,7 @@
 
 namespace dunar {
 
-class IOManager : Scheduler, public TimerManager {
+class IOManager : public Scheduler, public TimerManager {
  public:
   using ptr = std::shared_ptr<IOManager>;
   using RWMutexType = RWMutex;

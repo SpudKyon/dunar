@@ -33,13 +33,13 @@ void test_fiber() {
 
 TEST(FiberTest, TestRun) {
   dunar::Thread::SetName("main");
-  
+
   std::vector<dunar::Thread::ptr> thrs;
-  for(int i = 0; i < 3; ++i) {
+  for (int i = 0; i < 3; ++i) {
     thrs.push_back(dunar::Thread::ptr(
         new dunar::Thread(&test_fiber, "name_" + std::to_string(i))));
   }
-  for(auto i : thrs) {
+  for (auto i : thrs) {
     i->join();
   }
 }

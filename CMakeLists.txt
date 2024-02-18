@@ -28,6 +28,8 @@ set(TEST
         tests/config_test.cpp
         tests/thread_test.cpp
         tests/fiber_test.cpp
+        tests/address_test.cpp
+        tests/hook_test.cpp
 
 )
 

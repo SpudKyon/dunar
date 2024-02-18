@@ -4,9 +4,9 @@
 
 #include "fd_manager.h"
 #include "hook.h"
-#include <bits/fcntl-linux.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 namespace dunar {
 
@@ -31,7 +31,7 @@ bool FdCtx::init() {
   m_recvTimeout = -1;
   m_sendTimeout = -1;
 
-  struct stat fd_stat{};
+  struct stat fd_stat {};
   if (-1 == fstat(m_fd, &fd_stat)) {
     m_isInit = false;
     m_isSocket = false;
