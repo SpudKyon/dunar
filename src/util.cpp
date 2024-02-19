@@ -10,7 +10,7 @@
 
 namespace dunar {
 
-Logger::ptr g_logger = DUNAR_LOG_NAME("system");
+static Logger::ptr g_logger = DUNAR_LOG_NAME("system");
 
 pid_t GetThreadId() { return syscall(SYS_gettid); }
 

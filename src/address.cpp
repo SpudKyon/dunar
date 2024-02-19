@@ -3,8 +3,8 @@
 //
 
 #include "address.h"
-#include "my_endian.h"
 #include "log.h"
+#include "my_endian.h"
 #include <arpa/inet.h>
 #include <cstring>
 #include <ifaddrs.h>
@@ -13,7 +13,7 @@
 
 namespace dunar {
 
-static dunar::Logger::ptr g_logger = DUNAR_LOG_ROOT();
+static dunar::Logger::ptr g_logger = DUNAR_LOG_NAME("system");
 
 template <class T>
 static T CreateMask(uint32_t bits) {
@@ -53,6 +53,9 @@ Address::ptr Address::lookupAny(const std::string& host, int family, int type,
                                 int protocol) {
   std::vector<Address::ptr> result;
   if (lookup(result, host, family, type, protocol)) {
+    for (auto& i : result) {
+      std::cout << i->toString() << std::endl;
+    }
     return result[0];
   }
   return nullptr;
@@ -236,7 +239,7 @@ bool Address::operator==(const Address& rhs) const {
 
 bool Address::operator!=(const Address& rhs) const { return !(*this == rhs); }
 
-IPAddress::ptr IPAddress::create(const char* address, uint32_t port) {
+IPAddress::ptr IPAddress::create(const char* address, uint16_t port) {
   addrinfo hints, *results;
   memset(&hints, 0, sizeof(addrinfo));
 
@@ -265,7 +268,7 @@ IPAddress::ptr IPAddress::create(const char* address, uint32_t port) {
   }
 }
 
-IPv4Address::ptr IPv4Address::create(const char* address, uint32_t port) {
+IPv4Address::ptr IPv4Address::create(const char* address, uint16_t port) {
   IPv4Address::ptr rt(new IPv4Address);
   rt->m_addr.sin_port = byteswapOnLittleEndian(port);
   int result = inet_pton(AF_INET, address, &rt->m_addr.sin_addr);
@@ -286,6 +289,8 @@ IPv4Address::IPv4Address(uint32_t address, uint32_t port) {
   m_addr.sin_port = byteswapOnLittleEndian(port);
   m_addr.sin_addr.s_addr = byteswapOnLittleEndian(address);
 }
+
+sockaddr* IPv4Address::getAddr() { return (sockaddr*)&m_addr; }
 
 const sockaddr* IPv4Address::getAddr() const { return (sockaddr*)&m_addr; }
 
@@ -334,11 +339,11 @@ uint32_t IPv4Address::getPort() const {
   return byteswapOnLittleEndian(m_addr.sin_port);
 }
 
-void IPv4Address::setPort(uint32_t v) {
+void IPv4Address::setPort(uint16_t v) {
   m_addr.sin_port = byteswapOnLittleEndian(v);
 }
 
-IPv6Address::ptr IPv6Address::create(const char* address, uint32_t port) {
+IPv6Address::ptr IPv6Address::create(const char* address, uint16_t port) {
   IPv6Address::ptr rt(new IPv6Address);
   rt->m_addr.sin6_port = byteswapOnLittleEndian(port);
   int result = inet_pton(AF_INET6, address, &rt->m_addr.sin6_addr);
@@ -358,7 +363,7 @@ IPv6Address::IPv6Address() {
 
 IPv6Address::IPv6Address(const sockaddr_in6& address) { m_addr = address; }
 
-IPv6Address::IPv6Address(const uint8_t address[16], uint32_t port) {
+IPv6Address::IPv6Address(const uint8_t address[16], uint16_t port) {
   memset(&m_addr, 0, sizeof(m_addr));
   m_addr.sin6_family = AF_INET6;
   m_addr.sin6_port = byteswapOnLittleEndian(port);
@@ -432,9 +437,11 @@ uint32_t IPv6Address::getPort() const {
   return byteswapOnLittleEndian(m_addr.sin6_port);
 }
 
-void IPv6Address::setPort(uint32_t v) {
+void IPv6Address::setPort(uint16_t v) {
   m_addr.sin6_port = byteswapOnLittleEndian(v);
 }
+
+sockaddr* IPv6Address::getAddr() { return (sockaddr*)&m_addr; }
 
 static const size_t MAX_PATH_LEN = sizeof(((sockaddr_un*)0)->sun_path) - 1;
 
@@ -474,6 +481,10 @@ std::ostream& UnixAddress::insert(std::ostream& os) const {
   return os << m_addr.sun_path;
 }
 
+void UnixAddress::setAddrLen(uint32_t v) { m_length = v; }
+
+sockaddr* UnixAddress::getAddr() { return (sockaddr*)&m_addr; }
+
 UnknownAddress::UnknownAddress(int family) {
   memset(&m_addr, 0, sizeof(m_addr));
   m_addr.sa_family = family;
@@ -489,4 +500,7 @@ std::ostream& UnknownAddress::insert(std::ostream& os) const {
   os << "[UnknownAddress family=" << m_addr.sa_family << "]";
   return os;
 }
+
+sockaddr* UnknownAddress::getAddr() { return (sockaddr*)&m_addr; }
+
 }  // namespace dunar

@@ -9,12 +9,12 @@
 
 extern dunar::Logger::ptr test_logger;
 
-
 TEST(TestAddress, TEST1) {
   std::vector<dunar::Address::ptr> addrs;
 
   DUNAR_LOG_INFO(test_logger) << "begin";
-  bool v = dunar::Address::lookup(addrs, "www.dunar.top");
+  bool v = dunar::Address::lookup(addrs, "www.baidu.com", AF_INET);
+//  bool v = dunar::Address::lookup(addrs, "www.dunar.top");
   DUNAR_LOG_INFO(test_logger) << "end";
   if (!v) {
     DUNAR_LOG_ERROR(test_logger) << "lookup fail";

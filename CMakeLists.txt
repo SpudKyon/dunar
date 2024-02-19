@@ -21,6 +21,8 @@ set(SRC
         src/address.cpp
         src/fd_manager.cpp
         src/hook.cpp
+        src/bytearray.cpp
+        src/socket.cpp
 )
 
 set(TEST
@@ -30,7 +32,8 @@ set(TEST
         tests/fiber_test.cpp
         tests/address_test.cpp
         tests/hook_test.cpp
-
+        tests/bytearray_test.cpp
+        tests/socket_test.cpp
 )
 
 #add_executable(dunar src/main.cpp)

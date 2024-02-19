@@ -9,6 +9,7 @@
 #include <functional>
 #include <memory>
 #include <set>
+
 namespace dunar {
 
 class TimerManager;

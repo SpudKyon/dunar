@@ -19,7 +19,7 @@
 #include <vector>
 
 #define DUNAR_LOG_LEVEL(logger, level)                                \
-  if (logger->getLevel() <= level)                                    \
+  if ((logger)->getLevel() <= level)                                    \
   dunar::LogEventWrap(                                                \
       dunar::LogEvent::ptr(new dunar::LogEvent(                       \
           logger, level, __FILE__, __LINE__, 0, dunar::GetThreadId(), \
