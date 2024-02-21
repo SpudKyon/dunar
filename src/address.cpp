@@ -213,7 +213,7 @@ bool Address::getInterfaceAddresses(
 
 int Address::getFamily() const { return getAddr()->sa_family; }
 
-std::string Address::toString() {
+std::string Address::toString() const {
   std::stringstream ss;
   insert(ss);
   return ss.str();
@@ -502,5 +502,9 @@ std::ostream& UnknownAddress::insert(std::ostream& os) const {
 }
 
 sockaddr* UnknownAddress::getAddr() { return (sockaddr*)&m_addr; }
+
+std::ostream& operator<<(std::ostream& os, const Address& addr) {
+  return addr.insert(os);
+}
 
 }  // namespace dunar

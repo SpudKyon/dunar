@@ -5,8 +5,8 @@
 #ifndef DUNAR_BYTEARRAY_H
 #define DUNAR_BYTEARRAY_H
 
-#include <memory>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>

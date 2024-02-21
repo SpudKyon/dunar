@@ -11,8 +11,8 @@ namespace dunar {
 
 class Socket : public std::enable_shared_from_this<Socket>, Noncopyable {
  public:
-  typedef std::shared_ptr<Socket> ptr;
-  typedef std::weak_ptr<Socket> weak_ptr;
+  using ptr = std::shared_ptr<Socket>;
+  using weak_ptr = std::weak_ptr<Socket>;
 
   enum Type { TCP = SOCK_STREAM, UDP = SOCK_DGRAM };
 
@@ -108,6 +108,8 @@ class Socket : public std::enable_shared_from_this<Socket>, Noncopyable {
 
   Address::ptr m_localAddress;
   Address::ptr m_remoteAddress;
+
+  friend std::ostream& operator<<(std::ostream& os, const Socket& addr);
 };
 
 }  // namespace dunar

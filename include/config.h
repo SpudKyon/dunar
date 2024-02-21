@@ -19,6 +19,7 @@ class ConfigVarBase {
  public:
   using ptr = std::shared_ptr<ConfigVarBase>;
   using RWMutexType = RWMutex;
+
   ConfigVarBase(const std::string& name, const std::string& description = "")
       : m_name(name), m_description(description) {
     std::transform(m_name.begin(), m_name.end(), m_name.begin(), ::tolower);

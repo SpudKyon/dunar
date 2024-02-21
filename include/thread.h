@@ -132,7 +132,7 @@ class Mutex : Noncopyable {
 
 class NullMutex : Noncopyable {
  public:
-  typedef ScopedLockImpl<NullMutex> Lock;
+  using Lock = ScopedLockImpl<NullMutex>;
   NullMutex() {}
   ~NullMutex() {}
   void lock() {}
