@@ -693,7 +693,7 @@ struct LogIniter {
       DUNAR_LOG_INFO(DUNAR_LOG_ROOT()) << "on_logger_conf_changed";
       for (auto& i : new_value) {
         auto it = old_value.find(i);
-        dunar::Logger::ptr logger;
+        dunar::Logger::ptr logger = DUNAR_LOG_NAME(i.name);
         if (it == old_value.end()) {
           // 新增logger
           logger = DUNAR_LOG_NAME(i.name);

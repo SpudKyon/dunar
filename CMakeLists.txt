@@ -32,7 +32,8 @@ set(SRC
         src/tcp_server.cpp
         src/http.cpp
         src/http_parser.cpp
-        ${RLSRC}  # 包含生成的.cpp文件
+        ${RLSRC}
+        src/stream.cpp
 )
 
 set(TEST
@@ -47,6 +48,7 @@ set(TEST
         tests/http_test.cpp
         tests/http_parser_test.cpp
         tests/tcp_server_test.cpp
+        src/socket_stream.cpp
 )
 
 add_executable(test

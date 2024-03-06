@@ -36,7 +36,7 @@ uint64_t Fiber::GetFiberId() {
   return 0;
 }
 
-Fiber::Fiber() {
+Fiber::Fiber() : m_ctx() {
   m_state = EXEC;
   SetThis(this);
   if (getcontext(&m_ctx)) {
@@ -47,7 +47,7 @@ Fiber::Fiber() {
 }
 
 Fiber::Fiber(std::function<void()> cb, size_t stacksize, bool use_caller)
-    : m_id(++s_fiber_id), m_cb(cb) {
+    : m_id(++s_fiber_id), m_ctx(), m_cb(cb) {
   ++s_fiber_count;
   m_stacksize = stacksize ? stacksize : g_fiber_stack_size->getValue();
   m_stack = StackAllocator ::Alloc(stacksize);

@@ -2,6 +2,8 @@
 // Created by spud on 24-2-7.
 //
 
+#include <memory>
+
 #include "fiber.h"
 #include "log.h"
 #include "gmock/gmock.h"
@@ -36,10 +38,10 @@ TEST(FiberTest, TestRun) {
 
   std::vector<dunar::Thread::ptr> thrs;
   for (int i = 0; i < 3; ++i) {
-    thrs.push_back(dunar::Thread::ptr(
-        new dunar::Thread(&test_fiber, "name_" + std::to_string(i))));
+    thrs.push_back(std::make_shared<dunar::Thread>(
+        &test_fiber, "name_" + std::to_string(i)));
   }
-  for (auto i : thrs) {
+  for (const auto& i : thrs) {
     i->join();
   }
 }
